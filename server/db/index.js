@@ -7,6 +7,15 @@ var connection = mysql.createConnection({
     password : 'student',
 });
 
+connection.connect(function(err) {
+  if (err) {
+    console.error('Error connecting: ' + err.stack);
+    return;
+  }
+
+  console.log('Connected as id ' + connection.threadId);
+});
+
 exports.connection = connection;
 // Create a database connection and export it from this file.
 // You will need to connect with the user "root", no password,
