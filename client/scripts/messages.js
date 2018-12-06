@@ -1,8 +1,4 @@
 var Messages = {
-<<<<<<< HEAD
-  _Data: {}
-=======
-
 
   _data: {},
 
@@ -35,6 +31,4 @@ var Messages = {
     message.roomname = message.roomname || '';
     return message;
   }
-  
->>>>>>> 09ac82e91ed62db67065eef6305cbd8a809e5a36
 };

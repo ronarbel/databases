@@ -1,23 +1,4 @@
 var Rooms = {
-<<<<<<< HEAD
-  spareRooms: ['kitchen', 'foyer', 'water_cooler', 'garden', 'billiards', 'study', 'galley', 'the_brig', 'tavern', 'sketch_alleyway'],
-  activeRooms: [],
-  
-  render: _.template(`
-    <option value=" <%- roomname%> ">
-      <%- roomname%>
-    </option>
-  `),
-  
-  add: function() {
-    if (Rooms.spareRooms.length) {
-      var poppedRoom = Rooms.spareRooms.pop();
-      Rooms.activeRooms.push(poppedRoom);
-      $('#rooms select').append(Rooms.render({roomname: poppedRoom}));//another random array of values, roomname chosen by math.random
-    }
-  }
-=======
-
 
   _data: new Set,
 
@@ -57,5 +38,4 @@ var Rooms = {
     }
   }
   
->>>>>>> 09ac82e91ed62db67065eef6305cbd8a809e5a36
 };
