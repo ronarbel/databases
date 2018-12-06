@@ -3,6 +3,11 @@ CREATE DATABASE chat;
 USE chat;
 
 CREATE TABLE messages (
+  id int NOT NULL,
+  username varchar(50),
+  roomname varchar(50),
+  text varchar(400),
+  PRIMARY KEY (id)
   /* Describe your table here.*/
 );
 
