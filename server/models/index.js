@@ -3,16 +3,16 @@ var db = require('../db');
 module.exports = {
   messages: {
     get: function () {
-      connection.connect(function(err) {
+      db.connection.connect(function(err) {
         if (err) {
           console.error('Error connecting: ' + err.stack);
           return;
         }
 
-        console.log('Connected as id ' + connection.threadId);
+        console.log('Connected as id ' + db.connection.threadId);
       });
 
-      connection.query('SELECT * FROM messages', function (error, results, fields) {
+      db.connection.query('SELECT * FROM messages', function (error, results, fields) {
         if (error){
           throw error;
         }
@@ -20,33 +20,33 @@ module.exports = {
         return JSON.stringify(results);
       });
     }, // a function which produces all the messages
-    post: function () {
+    post: function (req) {
       let body = "";
       req.on('data', (chunk) => {
         body += chunk;
       }).on('end', () => {
-        connection.connect(function(err) {
+        db.connection.connect(function(err) {
           if (err) {
             console.error('Error connecting: ' + err.stack);
             return (err);
           }
           
-          console.log('Connected as id ' + connection.threadId);
+          console.log('Connected as id ' + db.connection.threadId);
         });
         // set insert ID of the roomname and username entry for messages foreign key reference
         var username_id = 0;
         var roomname_id = 0;
         var message = JSON.parse(body);
         //create username entry
-        connection.query('INSERT INTO username (name) VALUES (' + message.username + ')' , function(err, result) {
+        db.connection.query('INSERT INTO username (name) VALUES (' + message.username + ')' , function(err, result) {
           if (err){
             throw (err);
           }
           console.log('username entry created');
           username_id = result.insertId;
         });
-        //create roomname entry
-        connection.query('INSERT INTO roomname (name) VALUES (' + message.roomname + ')' , function(err, result) {
+        //refactor roomname into select query with the condition to insert on an empty (non-existant room) return value
+        db.connection.query('INSERT INTO roomname (name) VALUES (' + message.roomname + ')' , function(err, result) {
           if (err){
             throw(err);
           }
@@ -54,7 +54,7 @@ module.exports = {
           roomname_id = result.insertId;
         });
         //create messages entry
-        connection.query(`INSERT INTO messages (username_id, roomname_id, text) VALUES (${username_id}, ${roomname_id}, ${message.text})`, function(err, result) {
+        db.connection.query(`INSERT INTO messages (username_id, roomname_id, text) VALUES (${username_id}, ${roomname_id}, ${message.message})`, function(err, result) {
           if (err){
             throw(err);
           }
@@ -67,8 +67,33 @@ module.exports = {
 
   users: {
     // Ditto as above.
-    get: function () {},
-    post: function () {}
+    get: function () {
+      db.connection.connect(function(err) {
+        if (err) {
+          console.error('Error connecting: ' + err.stack);
+          return;
+        }
+
+        console.log('Connected as id ' + db.connection.threadId);
+      });
+      db.connection.query('SELECT * FROM username', function (error, results, fields) {
+        if (error){
+          throw (error);
+        }
+        console.log(results);
+        return JSON.stringify(results);
+      });
+    },
+    post: function (req) {
+      console.log(req.body);
+        db.connection.query("INSERT INTO username (username) VALUE ('" + [req.body.username] + "')", function (error, results) {
+          if (error) {
+            throw (error);
+          }
+          console.log(results);
+        });
+      return;
+    }
   }
-};
+}
 
