@@ -15,24 +15,29 @@ module.exports = {
     post: function (req, res) {
       console.log('posting message');
       if(req.method === 'POST'){
-        return new Promise((resolve, reject) => {
-          if(error){
-            reject(error);
-          }
-          var intermediate = resolve(models.messages.post(req));
-          console.log("intermediate", intermediate);
-        })
-        .then((postResult) => {
-          console.log(postResult);
-          if (postResult.affectedRows) {
-            res.writeHead(201);
-            res.end();
-          } else {
-            res.writeHead(400);
-            res.end('error posting message');
-          }
-        }); 
+        models.messages.post(req, function(){
+          res.writeHead(201);
+          res.end();
+        });
       }
+      //   return new Promise((resolve, reject) => {
+      //     if(error){
+      //       reject(error);
+      //     }
+      //     var intermediate = resolve(models.messages.post(req, res));
+      //     console.log("intermediate", intermediate);
+      //   })
+      //   .then((postResult) => {
+      //     console.log(postResult);
+      //     if (postResult.affectedRows) {
+      //       res.writeHead(201);
+      //       res.end();
+      //     } else {
+      //       res.writeHead(400);
+      //       res.end('error posting message');
+      //     }
+      //   }); 
+      // }
     } // a function which handles posting a message to the database
   },
 
@@ -51,17 +56,13 @@ module.exports = {
     post: function (req, res) {
       console.log('posting user');
       if(req.method === 'POST') {
-        var result = models.users.post(req);
-        if (!result) {
+        models.users.post(req, function() {
           res.writeHead(201);
           res.end();
-        } else {
-          res.writeHead(400);
-          res.end(result);
-        }
+        });
       }
     }
   }
-};
+}
 
 

@@ -13,7 +13,7 @@ module.exports = {
         return JSON.stringify(results);
       });
     }, // a function which produces all the messages
-    post: function (req) {
+    post: function (req, callback) {
       // create username
       var usernamePromise = new Promise((resolve, reject) => {
         db.connection.query(("SELECT * FROM username WHERE username = " + db.connection.escape(req.body.username)), function(error, results, fields) {
@@ -82,7 +82,7 @@ module.exports = {
             throw (error);
           }
           console.log(results);
-          return results; // --> expect to be OKPacket
+          callback(); // --> expect to be OKPacket
         });
       });
     } 
@@ -99,7 +99,7 @@ module.exports = {
         return JSON.stringify(results);
       });
     },
-    post: function (req) {      
+    post: function (req, callback) {      
       db.connection.query(("SELECT username FROM username WHERE username = " + db.connection.escape(req.body.username)), function(error, results, fields) {
         if (error) {
           throw (error);
@@ -120,7 +120,7 @@ module.exports = {
           });
         }
       });
-      return;
+      callback();
     }
   }
 }
