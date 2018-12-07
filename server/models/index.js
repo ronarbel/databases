@@ -1,3 +1,4 @@
+var Promise = require('bluebird');
 var db = require('../db');
 var _ = require('underscore');
 
@@ -13,22 +14,20 @@ module.exports = {
       });
     }, // a function which produces all the messages
     post: function (req) {
-      console.log(req.body);
-        // set insert ID of the roomname and username entry for messages foreign key reference
-      var usernameId;
-      var roomnameId;
-      // check if username exists, if yes, gab id, if not, insert and grab id
-      db.connection.query(("SELECT * FROM username WHERE username = " + db.connection.escape(req.body.username)), function(error, results, fields) {
+      // create username
+      var usernamePromise = new Promise((resolve, reject) => {
+        db.connection.query(("SELECT * FROM username WHERE username = " + db.connection.escape(req.body.username)), function(error, results, fields) {
           if (error) {
-            throw (error);
+            reject(error);
           }
+          var promiseVal = {};
           var exists = false;
           Object.keys(results).forEach((key) => {
             if(results[key].username === req.body.username){
               console.log('username exists');
               exists = true;
-              usernameId = results[key].id;
-              console.log("post username key fetch " + results[key].id);
+              promiseVal.usernameId = results[key].id;
+              console.log("post username key fetch " + promiseVal.usernameId);
             }  
           });
           if (!exists) {
@@ -37,55 +36,56 @@ module.exports = {
                 throw (error);
               }
               console.log('posting user now');
-              usernameId = results.insertId;
+              promiseVal.usernameId = results.insertId;
               console.log("post username key POST " + results.insertId);
             });
           }
+          resolve(promiseVal.usernameId);
         });
+      });
       
-       // check if roomname exists, if yes, gab id, if not, insert and grab id
-      db.connection.query(("SELECT * FROM rooms WHERE roomname = " + db.connection.escape(req.body.roomname)), function(error, results, fields) {
+      // create roomname
+      var roomnamePromise = new Promise((resolve, reject) => {
+        db.connection.query("SELECT * FROM rooms WHERE roomname = " + db.connection.escape(req.body.roomname), function(error, results) {
           if (error) {
-            throw (error);
+            reject(error);
           }
+          var promiseVal = {};
           var exists = false;
           Object.keys(results).forEach((key) => {
             if(results[key].roomname === req.body.roomname){
               console.log('roomname exists');
               exists = true;
-              roomnameId = results[key].id;
-              console.log("post roomname key fetch " + results[key].id, "roomnameID: " + roomnameId);
+              promiseVal.roomnameId = results[key].id;
+              console.log("post roomname key fetch " + results[key].id);
             }  
           });
           if (!exists) {
-            db.connection.query("INSERT INTO rooms (roomname) VALUE (" + db.connection.escape(req.body.roomname) + ")", function (error, results) {
+            db.connection.query("INSERT INTO username (username) VALUE (" + db.connection.escape(req.body.username) + ")", function (error, results) {
               if (error) {
                 throw (error);
               }
-              console.log('posting room now');
-              roomnameId = results.insertId;
+              console.log('posting user now');
+              promiseVal.roomnameId = results.insertId;
               console.log("post roomname key POST " + results.insertId);
             });
           }
+          resolve(promiseVal.roomnameId);
         });
+      });
       
-      // ********ASYNC PROBLEM: defining args before connection is complete above********
-      console.log("After query roomnameId: " + roomnameId);
-        //create messages entry
-        var args = [usernameId, roomnameId, db.connection.escape(req.body.message)]
-        console.log(args[0], args[0]);
-        console.log(usernameId, roomnameId);
-        console.log('args: ' + args);
-        db.connection.query(`INSERT INTO messages (username_id, roomname_id, text) VALUES (${args})`, function(err, result) {
-          if (err){
-            throw(err);
+      // create message
+      return Promise.all([usernamePromise, roomnamePromise]).then((args) => {
+        db.connection.query(`INSERT INTO messages (username_id, roomname_id, text) VALUE (${args[0]}, ${args[1]}, ${db.connection.escape(req.body.message)})`, function (error, results) {
+          if (error) {
+            console.log(error);
+            throw (error);
           }
-          console.log('CREATE message args: ' + args);
-          console.log('messages entry created');
-          console.log('POST MESSAGE RESULT: ' + result);
+          console.log(results);
+          return results; // --> expect to be OKPacket
         });
-        return;
-      }
+      });
+    } 
   },
 
   users: {

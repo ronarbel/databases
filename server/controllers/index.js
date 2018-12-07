@@ -15,15 +15,23 @@ module.exports = {
     post: function (req, res) {
       console.log('posting message');
       if(req.method === 'POST'){
-        var result = models.messages.post(req);
-        if (!result){
-          res.writeHead(201);
-          res.end();
-        } else {
-        //should return error or success case
-          res.writeHead(400);
-          res.end(result);
-        }
+        return new Promise((resolve, reject) => {
+          if(error){
+            reject(error);
+          }
+          var intermediate = resolve(models.messages.post(req));
+          console.log("intermediate", intermediate);
+        })
+        .then((postResult) => {
+          console.log(postResult);
+          if (postResult.affectedRows) {
+            res.writeHead(201);
+            res.end();
+          } else {
+            res.writeHead(400);
+            res.end('error posting message');
+          }
+        }); 
       }
     } // a function which handles posting a message to the database
   },
