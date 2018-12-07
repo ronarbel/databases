@@ -5,8 +5,10 @@ module.exports = {
     get: function (req, res) {
       console.log('getting message');
       if(req.method === 'GET'){
-        res.writeHead(200, {'Content-Type': 'application/json'});
-        res.end(models.messages.get());
+        models.messages.get(function(input) {
+          res.writeHead(200, {'Content-Type': 'application/json'});
+          res.end(input);
+        });
       } else {
         res.writeHead(404);
         res.end();
@@ -19,25 +21,10 @@ module.exports = {
           res.writeHead(201);
           res.end();
         });
+      } else {
+        res.writeHead(400);
+        res.end('error posting');
       }
-      //   return new Promise((resolve, reject) => {
-      //     if(error){
-      //       reject(error);
-      //     }
-      //     var intermediate = resolve(models.messages.post(req, res));
-      //     console.log("intermediate", intermediate);
-      //   })
-      //   .then((postResult) => {
-      //     console.log(postResult);
-      //     if (postResult.affectedRows) {
-      //       res.writeHead(201);
-      //       res.end();
-      //     } else {
-      //       res.writeHead(400);
-      //       res.end('error posting message');
-      //     }
-      //   }); 
-      // }
     } // a function which handles posting a message to the database
   },
 
@@ -46,8 +33,10 @@ module.exports = {
     get: function (req, res) {
       console.log('getting user');
       if(req.method === 'GET') {
-        res.writeHead(200, {'Content-Type': 'application/json'});
-        res.end(models.users.get());
+        model.users.get(function(input) {
+          res.writeHead(200, {'Content-Type': 'application/json'});
+          res.end(input);
+        });
       } else {
         res.writeHead(404);
         res.end();
@@ -60,6 +49,9 @@ module.exports = {
           res.writeHead(201);
           res.end();
         });
+      } else {
+        res.writeHead(400);
+        res.end('error posting');
       }
     }
   }
